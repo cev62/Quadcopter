@@ -6,7 +6,9 @@ class Model{
   int serialConnection, gamepadConnection;
   String outputText;
   boolean isEnabled;
-  boolean isRequested, isAcked;
+  boolean isRequested, isAcked, isIncomingAcked;
+  int numIncoming, numReceived;
+  int[] tmpInput, input;
   
   JXInputDevice gamepad;
   Serial serial;
@@ -23,10 +25,31 @@ class Model{
     isEnabled = false;
     isRequested = false;
     isAcked = false;
+    isIncomingAcked = false;
+    numIncoming = 0;
+    numReceived = 0;
+    tmpInput = new int[4];
+    input = new int[4];
     gamepadRefreshTimer = millis();
     serialSendTimer = millis();
     
   }
+  
+  /*
+   * This implements a custom multi-bit serial protocol. Here are the particulars
+   *
+   * When a machine wants to send a message, it begins by sending a request.
+   * A request is a byte containing 128 + [number of bytes of information contained in the message]
+   * A request may be sent repeatedly to ensure it is received.
+   *
+   * Once the other machine receives the request, the receiving machine will clear its serial buffer  
+   * in preparation for receiving the rest of the message.
+   * It will then ack (acknowlege) the request by sending a single byte containing 128.
+   *
+   * Once the sending machine receives the ack, it stops sending requests and begins sending the main message.
+   * Data in the main message must be < 128, any byte greater than 128 will be interpreted as either a request or an ack.
+   *
+   */
   
   void updateSerial(){
     if(serialConnection == CONNECTED){
@@ -48,13 +71,35 @@ class Model{
       
       while(serial.available() > 0){
         int data = serial.read();
-        if(isRequested){
-          if(data == 128){
+        if(data == 128){
+          if(isRequested){
             isAcked = true;
             isRequested = false;
           }
         }
-        //print((char)data);
+        else if(data > 128){
+          // Request from quadcopter
+          // TODO: might need to flush the serial buffer here. Probably not because garunteed there are no <128 bytes
+          serial.write(128); // Ack it
+          isIncomingAcked = true;
+          numIncoming = data & 127;
+          numReceived = 0;
+        }
+        else{
+          if(isIncomingAcked){
+            tmpInput[numReceived] = convert7B2CToInt(data);
+            numReceived++;
+            if(numReceived >= numIncoming){
+              for(int i = 0; i < numReceived; i++){
+                input[i] = tmpInput[i];
+              }
+              isAcked = false;
+              numIncoming = 0;
+              numReceived = 0;
+            }
+            
+          }
+        }
       }
     }
     
@@ -74,6 +119,16 @@ class Model{
       output += 128;
     }
     return output;
+  }
+  
+  // Converts a 7-bit 2's compliment [-64,63] to an int
+  int convert7B2CToInt(int input){
+    if(input < 64){
+      return input;
+    }
+    else{
+      return input - 128;
+    }
   }
   
   void requestMessage(){
