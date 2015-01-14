@@ -8,7 +8,7 @@ class Model{
   boolean isEnabled;
   boolean isRequested, isAcked, isIncomingAcked;
   int numIncoming, numReceived;
-  int[] tmpInput, input;
+  float[] tmpInput, input;
   
   JXInputDevice gamepad;
   Serial serial;
@@ -28,8 +28,8 @@ class Model{
     isIncomingAcked = false;
     numIncoming = 0;
     numReceived = 0;
-    tmpInput = new int[4];
-    input = new int[4];
+    tmpInput = new float[4];
+    input = new float[4];
     gamepadRefreshTimer = millis();
     serialSendTimer = millis();
     
@@ -67,6 +67,8 @@ class Model{
         
         serialSendTimer = millis();
         
+        println("Gyro: " + input[0] + ", " + input[1] + ", " + input[2] + ", " + input[3]);
+        
       }
       
       while(serial.available() > 0){
@@ -87,7 +89,7 @@ class Model{
         }
         else{
           if(isIncomingAcked){
-            tmpInput[numReceived] = convert7B2CToInt(data);
+            tmpInput[numReceived] = map((float)convert7B2CToInt(data), -64.0, 63.0, -1.0, 1.0);
             numReceived++;
             if(numReceived >= numIncoming){
               for(int i = 0; i < numReceived; i++){

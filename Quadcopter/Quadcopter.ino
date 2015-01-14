@@ -1,15 +1,19 @@
 int numIncoming, numReceived;
-bool isAcked;
+bool isAcked, isOutgoingAcked, isOutgoingRequested;
 int *tmpInput, *input;
+float *pseudoGyro;
 
 int ledDelay = 0;
 long int ledTimer = 0;
+long int serialSendTimer = 0;
 int ledState = LOW;
 
 void setup(){
   Serial.begin(9600);
   Serial.println("H");
   isAcked = false;
+  isOutgoingAcked = false;
+  isOutgoingRequested = false;
   numIncoming = 0;
   numReceived = 0;
   pinMode(13, OUTPUT);
@@ -20,6 +24,11 @@ void setup(){
   input[2] = 0;
   input[3] = 0;
   tmpInput = new int[4];
+  pseudoGyro = new float[4];
+  pseudoGyro[0] = 0.0;
+  pseudoGyro[1] = 0.0;
+  pseudoGyro[2] = 0.0;
+  pseudoGyro[3] = 0.0;
 }
 
 void loop(){
@@ -29,6 +38,29 @@ void loop(){
     digitalWrite(13, ledState);
     ledTimer = millis();
   }
+  
+  if(millis() - serialSendTimer > 50){
+   
+    for(int i = 0; i < 4; i++){
+      pseudoGyro[i] = 0.5 * (pseudoGyro[i] + map((float)input[i], -64.0, 63.0, -1.0, 1.0));
+    }
+    
+    if(isOutgoingAcked){
+      for(int i = 0; i < 4; i++){
+        Serial.write(convertFloatTo7B2C(pseudoGyro[i]));
+      }
+      isOutgoingAcked = false;
+    }
+    else{
+      Serial.write(128 + 4);
+      isOutgoingRequested = false;
+      isOutgoingAcked = false;
+    }
+    
+    serialSendTimer = millis();
+  }
+  
+  
   while(Serial.available() > 0){
     int data = Serial.read();
     delay(10);
@@ -59,6 +91,15 @@ void loop(){
       }
     }
   }
+}
+
+// Converts a float from [-1.0,1.0] to 7-bit 2's compliment [-64,63]
+int convertFloatTo7B2C(float input){
+  int output = (int)map(input, -1.0, 1.0, -64.0, 63.0);
+  if(output < 0){
+    output += 128;
+  }
+  return output;
 }
 
 int convert7B2CToInt(int input){
