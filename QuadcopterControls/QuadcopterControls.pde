@@ -28,6 +28,7 @@ void draw(){
   model.updateSerial();
   view.clearScreen();
   view.updateJoystickDisplay(model.getXInput(), model.getYInput(), model.getZInput(), model.getTurnInput());
+  view.updateGyroDisplay(model.getGyroX(), model.getGyroY(), model.getGyroTurn());
   view.updateGamepadIndicator(model.getGamepadConnection());
   view.updateSerialIndicator(model.getSerialConnection(), model.getSerialPort());
   view.updateTextOutput(model.getOutputText());

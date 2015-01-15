@@ -29,8 +29,8 @@ class Model{
     isIncomingAcked = false;
     numIncoming = 0;
     numReceived = 0;
-    tmpInput = new float[4];
-    input = new float[4];
+    tmpInput = new float[3];
+    input = new float[3];
     gamepadRefreshTimer = millis();
     serialSendTimer = millis();
     
@@ -70,7 +70,7 @@ class Model{
         
         serialSendTimer = millis();
         
-        println("Gyro: " + input[0] + ", " + input[1] + ", " + input[2] + ", " + input[3]);
+        println("Gyro: " + input[0] + ", " + input[1] + ", " + input[2]);
         
       }
       
@@ -218,6 +218,9 @@ class Model{
   double getYInput(){ return yInput; }
   double getZInput(){ return zInput; }
   double getTurnInput(){ return turnInput; }
+  double getGyroX(){ return input[0]; }
+  double getGyroY(){ return input[1]; }
+  double getGyroTurn(){ return input[2]; }
   int getGamepadConnection() { return gamepadConnection; }
   int getSerialConnection() { return serialConnection; }
   String getSerialPort() { return serialPort; }

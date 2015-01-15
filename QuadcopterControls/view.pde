@@ -123,6 +123,45 @@ class View{
             
   }
   
+  void updateGyroDisplay(double x, double y, double turn){
+    stroke(0);
+    
+    int gyroBound = (joystickDisplayOuterDiameter - joystickDisplayKnobDiameter) / 2;
+    int gyroX = (int)(x * gyroBound);
+    int gyroY = (int)(-y * gyroBound);
+    if(gyroX * gyroX + gyroY * gyroY > gyroBound * gyroBound){
+      float r = gyroBound;
+      float theta = atan2((float)gyroY,(float)gyroX);
+      gyroX = (int)(r * cos(theta));
+      gyroY = (int)(r * sin(theta));
+    }
+    
+    line(joystickDisplayCenterX + gyroX, 
+         joystickDisplayCenterY + gyroY + joystickDisplayKnobDiameter / 2, 
+         joystickDisplayCenterX + gyroX, 
+         joystickDisplayCenterY + gyroY - joystickDisplayKnobDiameter / 2
+         );
+    
+    line(joystickDisplayCenterX + gyroX + joystickDisplayKnobDiameter / 2, 
+         joystickDisplayCenterY + gyroY, 
+         joystickDisplayCenterX + gyroX - joystickDisplayKnobDiameter / 2, 
+         joystickDisplayCenterY + gyroY
+         );
+         
+    // Gyro turn
+    line(joystickDisplayCenterX + (int)(cos((float)(3.14159 / 2.0 + -turn * 3.14159 / 2.0)) * turnDisplayRadius),
+         joystickDisplayCenterY - (int)(sin((float)(3.14159 / 2.0 + -turn * 3.14159 / 2.0)) * turnDisplayRadius) + turnDisplayKnobDiameter / 2,
+         joystickDisplayCenterX + (int)(cos((float)(3.14159 / 2.0 + -turn * 3.14159 / 2.0)) * turnDisplayRadius),
+         joystickDisplayCenterY - (int)(sin((float)(3.14159 / 2.0 + -turn * 3.14159 / 2.0)) * turnDisplayRadius) - turnDisplayKnobDiameter / 2);
+ 
+     line(joystickDisplayCenterX + (int)(cos((float)(3.14159 / 2.0 + -turn * 3.14159 / 2.0)) * turnDisplayRadius) + turnDisplayKnobDiameter / 2,
+         joystickDisplayCenterY - (int)(sin((float)(3.14159 / 2.0 + -turn * 3.14159 / 2.0)) * turnDisplayRadius),
+         joystickDisplayCenterX + (int)(cos((float)(3.14159 / 2.0 + -turn * 3.14159 / 2.0)) * turnDisplayRadius) - turnDisplayKnobDiameter / 2,
+         joystickDisplayCenterY - (int)(sin((float)(3.14159 / 2.0 + -turn * 3.14159 / 2.0)) * turnDisplayRadius));
+         
+  }
+
+  
   void updateGamepadIndicator(int gamepadConnection){
     if(gamepadConnection == DISCONNECTED){
       fill(red);

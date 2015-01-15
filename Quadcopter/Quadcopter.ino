@@ -54,12 +54,12 @@ void loop(){
       //}
       Serial.write(convertFloatTo7B2C(pseudoGyro[0]));
       Serial.write(convertFloatTo7B2C(pseudoGyro[1]));
-      Serial.write(convertFloatTo7B2C(pseudoGyro[2]));
+      //Serial.write(convertFloatTo7B2C(pseudoGyro[2]));
       Serial.write(convertFloatTo7B2C(pseudoGyro[3]));
       isOutgoingAcked = false;
     }
     else{
-      Serial.write(128 + 4);
+      Serial.write(128 + 3);
       isOutgoingRequested = true;
       isOutgoingAcked = false;
     }
