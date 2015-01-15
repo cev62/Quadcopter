@@ -42,7 +42,10 @@ void loop(){
   if(millis() - serialSendTimer > 50){
    
     for(int i = 0; i < 4; i++){
-      pseudoGyro[i] = 0.5 * (pseudoGyro[i] + map((float)input[i], -64.0, 63.0, -1.0, 1.0));
+      float convertedInput = 0.0;
+      if(input >= 0){ convertedInput = (float)input[i] / 63.0; }
+      else { convertedInput = (float)input[i] / 63.0; }
+      pseudoGyro[i] = 0.5 * (pseudoGyro[i] + convertedInput);
     }
     
     if(isOutgoingAcked){
@@ -54,6 +57,10 @@ void loop(){
       Serial.write(convertFloatTo7B2C(pseudoGyro[2]));
       Serial.write(convertFloatTo7B2C(pseudoGyro[3]));
       isOutgoingAcked = false;
+      
+      //Serial.write(128 + 4);
+      //isOutgoingRequested = true;
+      //isOutgoingAcked = false;
     }
     else{
       Serial.write(128 + 4);

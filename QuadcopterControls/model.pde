@@ -58,6 +58,8 @@ class Model{
         if( isAcked ){
           sendMessage();
           isAcked = false;
+          requestMessage();
+          isRequested = true;
         }
         else{
           requestMessage();
