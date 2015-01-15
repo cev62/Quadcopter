@@ -3,6 +3,7 @@ class Model{
   final String serialPort = "COM3";
   
   double xInput, yInput, zInput, turnInput;
+  double gyroX, gyroY, gyroTurn;
   int serialConnection, gamepadConnection;
   String outputText;
   boolean isEnabled;
