@@ -26,9 +26,9 @@ void setup(){
   tmpInput = new int[4];
   pseudoGyro = new float[4];
   pseudoGyro[0] = 0.0;
-  pseudoGyro[1] = 0.1;
-  pseudoGyro[2] = 0.2;
-  pseudoGyro[3] = 0.3;
+  pseudoGyro[1] = 0.0;
+  pseudoGyro[2] = 0.0;
+  pseudoGyro[3] = 0.0;
 }
 
 void loop(){
@@ -42,7 +42,7 @@ void loop(){
   if(millis() - serialSendTimer > 50){
    
     for(int i = 0; i < 4; i++){
-      //pseudoGyro[i] = 0.5 * (pseudoGyro[i] + map((float)input[i], -64.0, 63.0, -1.0, 1.0));
+      pseudoGyro[i] = 0.5 * (pseudoGyro[i] + map((float)input[i], -64.0, 63.0, -1.0, 1.0));
     }
     
     if(isOutgoingAcked){
@@ -108,13 +108,12 @@ void loop(){
 
 // Converts a float from [-1.0,1.0] to 7-bit 2's compliment [-64,63]
 int convertFloatTo7B2C(float input){
-  //int output = (int)map(input, -1.0, 1.0, -64.0, 63.0);
   int output = 0;
   if(input >= 0){
     output = (int)round(input * 63);
   }
   else{
-    output = (int)round)(input * 64);
+    output = (int)round(input * 64);
   }
   if(output < 0){
     output += 128;
