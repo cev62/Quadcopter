@@ -89,6 +89,7 @@ class Model{
         }
         else{
           if(isIncomingAcked){
+            //println("Data " + numIncoming + ": " + data);
             tmpInput[numReceived] = map((float)convert7B2CToInt(data), -64.0, 63.0, -1.0, 1.0);
             numReceived++;
             if(numReceived >= numIncoming){
