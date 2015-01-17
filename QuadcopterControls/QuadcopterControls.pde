@@ -15,22 +15,24 @@ final int CONNECTED = 2;
 
 View view;
 Model model;
+Comm comm;
 
 void setup(){
   
   view = new View();
   model = new Model();
+  comm = new Comm(model);
   
 }
 
 void draw(){
   model.updateGamepad();
-  model.updateSerial();
+  comm.updateSerial();
   view.clearScreen();
   view.updateJoystickDisplay(model.getXInput(), model.getYInput(), model.getZInput(), model.getTurnInput());
   view.updateGyroDisplay(model.getGyroX(), model.getGyroY(), model.getGyroTurn());
   view.updateGamepadIndicator(model.getGamepadConnection());
-  view.updateSerialIndicator(model.getSerialConnection(), model.getSerialPort());
+  view.updateSerialIndicator(comm.getSerialConnection(), comm.getSerialPort());
   view.updateTextOutput(model.getOutputText());
 }
 
@@ -41,19 +43,19 @@ void mousePressed(){
   }
   if(dist((float)mouseX, (float)mouseY, 37.0, 262.0) < 10){
     // Serial button pressed
-    model.toggleSerial();
+    comm.toggleSerial();
   }
 }
 
 void startSerial(){
   try{
-    model.serial = new Serial(this, model.getSerialPort(), 9600);
-    model.serialConnection = CONNECTED;
-    model.isAcked = false;
-    model.isRequested = false;
+    comm.serial = new Serial(this, comm.getSerialPort(), 9600);
+    comm.serialConnection = CONNECTED;
+    comm.isAcked = false;
+    comm.isRequested = false;
   }
   catch(Exception e){
-    model.failSerial();
+    comm.failSerial();
     println(e);
   }
 }
