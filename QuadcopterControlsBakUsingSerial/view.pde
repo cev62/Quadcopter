@@ -180,17 +180,20 @@ class View{
     text("Gamepad", 55, 295);
   }
   
-  void updateSerialIndicator(boolean isConnected){
-    if(!isConnected){
+  void updateSerialIndicator(int serialConnection, String serialPort){
+    if(serialConnection == DISCONNECTED){
       fill(red);
     }
-    else{
+    else if(serialConnection == CONNECTED){
       fill(green);
+    }
+    else{
+      fill(yellow);
     }
     stroke(200);
     ellipse(37,262, 21, 21); fill(0);
     textSize(textOutputSize);
-    text("Socket", 55, 270);
+    text("Serial: " + serialPort, 55, 270);
   }
   
   void updateTextOutput(String text){

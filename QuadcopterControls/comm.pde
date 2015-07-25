@@ -1,30 +1,22 @@
-class Comm{
+class Comm extends Thread
+{
   
-  final String serialPort = "COM3";
-  
-  boolean isRequested, isAcked, isIncomingAcked;
-  int numIncoming, numReceived;
-  float[] tmpInput;
-  
-  int serialConnection;
-  Serial serial;
-  
-  long serialSendTimer;
-  
-  Model model;
+  final static String HOST = "192.168.1.31";
+  final static int PORT = 22333;
+        
+  boolean m_bIsConnected;
+  boolean m_bIsSocketInitialized;  // Flag is set if the current socket object still needs to be closed.
+  long m_recvTimer;
+  Model m_model;
+  Socket m_socket;
+  PrintWriter m_socketOut;
+  BufferedReader m_socketIn;
   
   Comm(Model model){
-    this.model = model;
-    serialConnection = DISCONNECTED;
-
-    isRequested = false;
-    isAcked = false;
-    isIncomingAcked = false;
-    numIncoming = 0;
-    numReceived = 0;
-    tmpInput = new float[3];
-    
-    serialSendTimer = millis();
+    this.m_model = model;
+    m_bIsConnected = false;
+    m_recvTimer = 0;
+    start(); // Start thread
   }
   
   /*
@@ -42,68 +34,92 @@ class Comm{
    * Data in the main message must be < 128, any byte greater than 128 will be interpreted as either a request or an ack.
    *
    */
-  
-  void updateSerial(){
-    if(serialConnection == CONNECTED){
-      if(millis() - serialSendTimer > 50){
-        
-        if( isAcked ){
-          sendMessage();
-          isAcked = false;
-          requestMessage();
-          isRequested = true;
-        }
-        else{
-          requestMessage();
-          isRequested = true;
-          isAcked = false;
-        }
-        
-        serialSendTimer = millis();
-        
-        
-      }
-      
-      while(serial.available() > 0){
-        int data = serial.read();
-        if(data == 128){
-          if(isRequested){
-            isAcked = true;
-            isRequested = false;
-          }
-        }
-        else if(data > 128){
-          // Request from quadcopter
-          // TODO: might need to flush the serial buffer here. Probably not because garunteed there are no <128 bytes
-          serial.write(128); // Ack it
-          isIncomingAcked = true;
-          numIncoming = data & 127;
-          numReceived = 0;
-        }
-        else{
-          if(isIncomingAcked){
-            //println("Data " + numIncoming + ": " + data);
-            tmpInput[numReceived] = map((float)convert7B2CToInt(data), -64.0, 63.0, -1.0, 1.0);
-            numReceived++;
-            if(numReceived >= numIncoming){
-              loadInputIntoModel();
-              isAcked = false;
-              numIncoming = 0;
-              numReceived = 0;
+   
+  // This thread just tries to connect over the socket
+  public void run() {
+    while(true)
+    {
+      if (!m_bIsConnected)
+      {
+        // Socket is DISCONNECTED. Try to establish connection.
+        // Attempt to make connection
+        try
+        {
+            if (m_bIsSocketInitialized)
+            {
+              m_socket.close();
+              m_bIsSocketInitialized = false;
             }
-            
-          }
+            System.out.print("Attempting to connect...");
+            m_socket = new Socket(Comm.HOST, Comm.PORT);
+            m_bIsSocketInitialized = true;
+            m_bIsConnected = true;
+            m_socketOut = new PrintWriter(m_socket.getOutputStream(), true);
+            m_socketIn = new BufferedReader(new InputStreamReader(m_socket.getInputStream()));
+            System.out.println("Connection made!");
+        } catch (Exception e) {
+            m_bIsConnected = false;
+            System.err.println("Can't connect to host " + HOST + ":" + PORT);
+        }
+      }
+      else
+      {
+        // Socket is CONNECTED. Send/Receive data.
+        try
+        {
+          // This will wait untill a message is received, then it will send a message back.
+          receiveMessage();
+          sendMessage();
+        }
+        catch (Exception e)
+        {
+          m_bIsConnected = false;
+          System.err.println("ERROR: Communication Failed...");
         }
       }
     }
-    
+  }
+ 
+  void update(){
+    if (millis() - m_recvTimer > 1050)
+    {
+      // Timed out
+      m_bIsConnected = false;
+    }
   }
   
-  void sendMessage(){
-    serial.write(convertFloatTo7B2C((float)model.xInput));
+  void receiveMessage() throws Exception
+  {
+    String msg = m_socketIn.readLine();
+    System.out.println("From pi: " + msg);
+    if (msg != null)
+    {
+      m_recvTimer = millis();
+    }
+  }
+  
+  void sendMessage() throws Exception
+  {
+    /*serial.write(convertFloatTo7B2C((float)model.xInput));
+    dataOut = convertFloatTo7B2C((float)model.xInput);
     serial.write(convertFloatTo7B2C((float)model.yInput));
     serial.write(convertFloatTo7B2C((float)model.zInput));
-    serial.write(convertFloatTo7B2C((float)model.turnInput));
+    serial.write(convertFloatTo7B2C((float)model.turnInput));*/
+    
+    String msg = "";
+    synchronized(m_model)
+    {
+      msg += convertFloatToInt((float)model.xInput);
+      msg += ",";
+      msg += convertFloatToInt((float)model.yInput);
+      msg += ",";
+      msg += convertFloatToInt((float)model.zInput);
+      msg += ",";
+      msg += convertFloatToInt((float)model.turnInput);
+      msg += "$";
+    }
+    m_socketOut.println(msg);
+    
   }
   
   // Converts a float from [-1.0,1.0] to 7-bit 2's compliment [-64,63]
@@ -112,6 +128,12 @@ class Comm{
     if(output < 0){
       output += 128;
     }
+    return output;
+  }
+  
+  // Converts a float from [-1.0,1.0] to an unsigned int [0,255]
+  int convertFloatToInt(float input){
+    int output = (int)map(input, -1.0, 1.0, 0.0, 255.0);
     return output;
   }
   
@@ -125,46 +147,16 @@ class Comm{
     }
   }
   
-  void requestMessage(){
-    serial.write(128 + 4);
+  void toggleConnection()
+  {
+      // @TODO implement
   }
   
-  void toggleSerial(){
-    if(serialConnection == CONNECTED) { return; }
-    if(serialConnection == CONNECTING) { return; }
-    
-    if(serialConnection == DISCONNECTED){
-      boolean isFound = false;
-      for(int i = 0; i < Serial.list().length; i++){
-        if(serialPort.equals(Serial.list()[i])){
-          isFound = true;
-          if(serial == null){
-            serialConnection = CONNECTING;
-            thread("startSerial");
-          }
-          else{
-            println(serialPort + " is already Initialized");
-          }
-        }
-      }
-      if(!isFound){
-        println(serialPort + " was not found.");
-      }
-    }
+  void loadInputIntoModel()
+  {
     
   }
   
-  void failSerial(){
-    serialConnection = DISCONNECTED;
-  }
-  
-  void loadInputIntoModel(){
-    model.gyroX = tmpInput[0];
-    model.gyroY = tmpInput[1];
-    model.gyroTurn = tmpInput[2];
-  }
-  
-  int getSerialConnection() { return serialConnection; }
-  String getSerialPort() { return serialPort; }
+  boolean isConnected() { return m_bIsConnected; }
   
 }

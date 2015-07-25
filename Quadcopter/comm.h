@@ -1,7 +1,8 @@
+#include <SoftwareSerial.h>
+
 #ifndef COMM_H
 #define COMM_H
 
-#include <SoftwareSerial.h>
 #include "Arduino.h"
 
 
@@ -11,14 +12,17 @@ private:
   bool isAcked, isOutgoingAcked, isOutgoingRequested;
   int *tmpInput, *input;
   float *pseudoGyro;
-  long int serialSendTimer;
+  long int serialSendTimer, lastMessageReceivedTimer;
   
   int convertFloatTo7B2C(float input);
   int convert7B2CToInt(int input);
   
 public:
   Comm();
-  void Update();
+  void Update();   // Regular Serial
+  void UpdateSS(); // Software Serial
+  bool IsFreshMessage();
+  SoftwareSerial serial;
 };
 
 #endif

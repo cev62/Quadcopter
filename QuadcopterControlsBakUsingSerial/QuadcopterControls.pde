@@ -8,12 +8,10 @@ import de.hardcode.jxinput.keyboard.*;
 import de.hardcode.jxinput.test.*;
 import de.hardcode.jxinput.util.*;
 import de.hardcode.jxinput.virtual.*;
-import java.io.*;
-import java.net.*;
 
-int CONNECTED = 0;
-int CONNECTING = 1;
-int DISCONNECTED = 2;
+final int DISCONNECTED = 0;
+final int CONNECTING = 1;
+final int CONNECTED = 2;
 
 View view;
 Model model;
@@ -29,15 +27,15 @@ void setup(){
 
 void draw(){
   model.updateGamepad();
-  comm.update();
+  comm.updateSerial();
   
-  //println("Gyro: " + model.getGyroX() + ", " + comm.dataIn + ", " + comm.dataOut);
+  println("Gyro: " + model.getGyroX() + ", " + comm.dataIn + ", " + comm.dataOut);
   
   view.clearScreen();
   view.updateJoystickDisplay(model.getXInput(), model.getYInput(), model.getZInput(), model.getTurnInput());
   view.updateGyroDisplay(model.getGyroX(), model.getGyroY(), model.getGyroTurn());
   view.updateGamepadIndicator(model.getGamepadConnection());
-  view.updateSerialIndicator(comm.isConnected());
+  view.updateSerialIndicator(comm.getSerialConnection(), comm.getSerialPort());
   view.updateTextOutput(model.getOutputText());
 }
 
@@ -48,8 +46,22 @@ void mousePressed(){
   }
   if(dist((float)mouseX, (float)mouseY, 37.0, 262.0) < 10){
     // Serial button pressed
-    comm.toggleConnection();
+    comm.toggleSerial();
   }
 }
+
+void startSerial(){
+  try{
+    comm.serial = new Serial(this, comm.getSerialPort(), 9600);
+    comm.serialConnection = CONNECTED;
+    comm.isAcked = false;
+    comm.isRequested = false;
+  }
+  catch(Exception e){
+    comm.failSerial();
+    println(e);
+  }
+}
+
 
 
