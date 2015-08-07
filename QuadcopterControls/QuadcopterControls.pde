@@ -37,7 +37,9 @@ void draw(){
   view.updateJoystickDisplay(model.getXInput(), model.getYInput(), model.getZInput(), model.getTurnInput());
   view.updateGyroDisplay(model.getGyroX(), model.getGyroY(), model.getGyroTurn());
   view.updateGamepadIndicator(model.getGamepadConnection());
-  view.updateSerialIndicator(comm.isConnected());
+  view.updateSocketIndicator(comm.isConnected());
+  view.updateDownloadCodeIndicator(false);
+  view.updatePowerIndicator(true);
   view.updateTextOutput(model.getOutputText());
 }
 
@@ -47,8 +49,16 @@ void mousePressed(){
     model.refreshGamepad();
   }
   if(dist((float)mouseX, (float)mouseY, 37.0, 262.0) < 10){
+    // Doesn't make sense to toggle the connection manually
+    //comm.toggleConnection();
+  }
+  if(dist((float)mouseX, (float)mouseY, 37.0, 324.0) < 10){
     // Serial button pressed
-    comm.toggleConnection();
+    comm.downloadCodeCommand();
+  }
+  if(dist((float)mouseX, (float)mouseY, 37.0, 349.0) < 10){
+    // Serial button pressed
+    comm.powerOffCommand();
   }
 }
 

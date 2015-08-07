@@ -147,7 +147,12 @@ class Comm extends Thread
     }
   }
   
-  void toggleConnection()
+  void downloadCodeCommand()
+  {
+      // @TODO implement
+  }
+  
+  void powerOffCommand()
   {
       // @TODO implement
   }

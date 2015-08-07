@@ -37,7 +37,7 @@ class View{
   
   // Text Output Parameters
   final int textOutputBoxCornerX = 25;
-  final int textOutputBoxCornerY = 350;
+  final int textOutputBoxCornerY = 400;
   final int textOutputBoxWidth = 275;
   final int textOutputBoxHeight = 50;
   final int textOutputSize = 16;
@@ -51,7 +51,7 @@ class View{
   
   View(){
     // Initialize Display
-    size(325, 450);
+    size(325, 500);
     background(255);
   }
   
@@ -180,7 +180,7 @@ class View{
     text("Gamepad", 55, 295);
   }
   
-  void updateSerialIndicator(boolean isConnected){
+  void updateSocketIndicator(boolean isConnected){
     if(!isConnected){
       fill(red);
     }
@@ -191,6 +191,32 @@ class View{
     ellipse(37,262, 21, 21); fill(0);
     textSize(textOutputSize);
     text("Socket", 55, 270);
+  }
+  
+  void updateDownloadCodeIndicator(boolean isdownloading){
+    if(!isdownloading){
+      fill(green);
+    }
+    else{
+      fill(red);
+    }
+    stroke(200);
+    ellipse(37,316, 21, 21); fill(0);
+    textSize(textOutputSize);
+    text("Download Code", 55, 324);
+  }
+  
+  void updatePowerIndicator(boolean isPowerOn){
+    if(isPowerOn){
+      fill(green);
+    }
+    else{
+      fill(red);
+    }
+    stroke(200);
+    ellipse(37,343, 21, 21); fill(0);
+    textSize(textOutputSize);
+    text("Power", 55, 349);
   }
   
   void updateTextOutput(String text){
