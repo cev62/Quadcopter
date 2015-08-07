@@ -1,0 +1,23 @@
+Communications protocols:
+
+Laptop to Pi:
+
+[State command],[xxx],[xxx],[xxx],[xxx]
+
+    where [State command] is one of:
+        RUN
+        STOP
+        DOWNLOAD CODE
+        POWER OFF
+
+    where [xxx] is a number from 0 to 255 for that axis' value
+
+Pi to Laptop:
+
+[State],[xxx],[xxx],[xxx],[xxx]
+
+    where the reported state [State] is one of:
+        RUN
+        STOP
+        DOWNLOAD CODE
+        POWER OFF
