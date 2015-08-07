@@ -75,7 +75,7 @@ def clientthread(conn):
         c_lock.release()
         print(commands)
             
-        reply = 'OK...' + data
+        reply = 'OK2...' + data
         conn.sendall(reply)
         time.sleep(0.010);
         if not data:
