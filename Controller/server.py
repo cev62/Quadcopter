@@ -88,7 +88,7 @@ def clientthread(conn):
             pass
             #subprocess.Popen("sudo halt".split(" "))
 
-        reply = 'OK5...' + data
+        reply = 'OK6...' + data
         conn.sendall(reply)
         time.sleep(0.010);
         if not data:
