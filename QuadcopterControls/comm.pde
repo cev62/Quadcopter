@@ -3,6 +3,12 @@ class Comm extends Thread
   
   final static String HOST = "192.168.1.31";
   final static int PORT = 22333;
+  
+  
+  public static final int STATE_RUN = 0;
+  public static final int STATE_STOP = 1;
+  public static final int STATE_DOWNLOAD_CODE = 2;
+  public static final int STATE_POWER_OFF = 3; 
         
   boolean m_bIsConnected;
   boolean m_bIsSocketInitialized;  // Flag is set if the current socket object still needs to be closed.
@@ -12,10 +18,13 @@ class Comm extends Thread
   PrintWriter m_socketOut;
   BufferedReader m_socketIn;
   
+  int state, prevState;
+  
   Comm(Model model){
     this.m_model = model;
     m_bIsConnected = false;
     m_recvTimer = 0;
+    state = STATE_POWER_OFF;
     start(); // Start thread
   }
   
@@ -109,6 +118,24 @@ class Comm extends Thread
     String msg = "";
     synchronized(m_model)
     {
+      switch (state)
+      {
+        case STATE_RUN:
+          msg += "RUN";
+          break;
+        case STATE_STOP:
+          msg += "STOP";
+          break;
+        case STATE_DOWNLOAD_CODE:
+          msg += "DOWNLOAD_CODE";
+          state = prevState;
+          break;
+        case STATE_POWER_OFF:
+          msg += "POWER_OFF";
+          state = prevState;
+          break; 
+      }
+      msg += ",";
       msg += convertFloatToInt((float)model.xInput);
       msg += ",";
       msg += convertFloatToInt((float)model.yInput);
@@ -119,6 +146,7 @@ class Comm extends Thread
       msg += "$";
     }
     m_socketOut.println(msg);
+    System.out.println(msg);
     
   }
   
@@ -149,12 +177,14 @@ class Comm extends Thread
   
   void downloadCodeCommand()
   {
-      // @TODO implement
+      prevState = state;
+      state = STATE_DOWNLOAD_CODE;
   }
   
   void powerOffCommand()
   {
-      // @TODO implement
+      prevState = state;
+      state = STATE_POWER_OFF;
   }
   
   void loadInputIntoModel()
