@@ -74,16 +74,17 @@ def clientthread(conn):
         c_lock.acquire()
         commands = data.split("$")[0]
         c_lock.release()
+        state_cmd = commands.split(",")[0]
         print(commands)
 
-        if commands[0] == "RUN":
+        if state_cmd == "RUN":
             pass
-        elif commands[0] == "STOP":
+        elif state_cmd == "STOP":
             pass
-        elif commands[0] == "DOWNLOAD_CODE":
+        elif state_cmd == "DOWNLOAD_CODE":
             subprocess.Popen("./download-code.sh".split(" "))
             sys.exit(0)
-        elif commands[0] == "POWER_OFF":
+        elif state_cmd == "POWER_OFF":
             subprocess.Popen("sudo halt".split(" "))
         
             
