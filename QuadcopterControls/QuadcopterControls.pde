@@ -38,8 +38,8 @@ void draw(){
   view.updateGyroDisplay(model.getGyroX(), model.getGyroY(), model.getGyroTurn());
   view.updateGamepadIndicator(model.getGamepadConnection());
   view.updateSocketIndicator(comm.isConnected());
-  view.updateDownloadCodeIndicator(false);
-  view.updatePowerIndicator(true);
+  view.updateDownloadCodeIndicator(comm.isDownloadingCode);
+  view.updatePowerIndicator(!comm.isPoweringOff);
   view.updateTextOutput(model.getOutputText());
 }
 

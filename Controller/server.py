@@ -85,10 +85,10 @@ def clientthread(conn):
             subprocess.Popen("./download-code.sh".split(" "))
             sys.exit(0)
         elif state_cmd == "POWER_OFF":
-            subprocess.Popen("sudo halt".split(" "))
+            #subprocess.Popen("sudo halt".split(" "))
         
             
-        reply = 'OK3...' + data
+        reply = 'OK4...' + data
         conn.sendall(reply)
         time.sleep(0.010);
         if not data:

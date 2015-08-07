@@ -20,11 +20,15 @@ class Comm extends Thread
   
   int state, prevState;
   
+  boolean isDownloadingCode, isPoweringOff;
+  
   Comm(Model model){
     this.m_model = model;
     m_bIsConnected = false;
     m_recvTimer = 0;
     state = STATE_POWER_OFF;
+    isDownloadingCode = false;
+    isPoweringOff = false;
     start(); // Start thread
   }
   
@@ -101,6 +105,8 @@ class Comm extends Thread
   {
     String msg = m_socketIn.readLine();
     System.out.println("From pi: " + msg);
+    isDownloadingCode = false;
+    isPoweringOff = false;
     if (msg != null)
     {
       m_recvTimer = millis();
@@ -179,12 +185,14 @@ class Comm extends Thread
   {
       prevState = state;
       state = STATE_DOWNLOAD_CODE;
+      isDownloadingCode = true;
   }
   
   void powerOffCommand()
   {
       prevState = state;
       state = STATE_POWER_OFF;
+      isPoweringOff = true;
   }
   
   void loadInputIntoModel()
