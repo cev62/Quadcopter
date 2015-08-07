@@ -87,8 +87,8 @@ def clientthread(conn):
         elif state_cmd == "POWER_OFF":
             pass
             #subprocess.Popen("sudo halt".split(" "))
-        
-        reply = 'OK4...' + data
+
+        reply = 'OK5...' + data
         conn.sendall(reply)
         time.sleep(0.010);
         if not data:

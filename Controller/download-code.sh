@@ -1,3 +1,4 @@
 sleep 2
+cd /home/pi/Quadcopter
 git pull
-python server.py
+python Controller/server.py
