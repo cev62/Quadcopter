@@ -4,7 +4,6 @@ class Model{
   double gyroX, gyroY, gyroTurn;
   int gamepadConnection;
   String outputText;
-  boolean isEnabled;
   
   JXInputDevice gamepad;
   long gamepadRefreshTimer;
@@ -16,7 +15,6 @@ class Model{
     turnInput = 0.0;
     gamepadConnection = DISCONNECTED;
     outputText = "";
-    isEnabled = false;
     gamepadRefreshTimer = millis();    
   }
   

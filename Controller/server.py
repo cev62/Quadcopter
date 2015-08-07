@@ -4,6 +4,7 @@ from thread import *
 import serial
 import time
 import threading
+import subprocess
 
 
 
@@ -74,8 +75,19 @@ def clientthread(conn):
         commands = data.split("$")[0]
         c_lock.release()
         print(commands)
+
+        if commands[0] == "RUN":
+            pass
+        elif commands[0] == "STOP":
+            pass
+        elif commands[0] == "DOWNLOAD_CODE":
+            subprocess.Popen("./download-code.sh".split(" "))
+            sys.exit(0)
+        elif commands[0] == "POWER_OFF":
+            subprocess.Popen("sudo halt".split(" "))
+        
             
-        reply = 'OK2...' + data
+        reply = 'OK3...' + data
         conn.sendall(reply)
         time.sleep(0.010);
         if not data:
